@@ -41,26 +41,6 @@ function ext(originalname) {
   return m ? m[1].toLowerCase() : 'webm';
 }
 
-// Некоторые клиенты + busboy декодируют текстовые поля как latin1 → кириллица бьётся.
-// Чиним ТОЛЬКО строки, похожие на mis-decoded UTF-8 (все символы ≤0xFF и есть байты 0x80-0xFF);
-// уже корректную кириллицу (символы >0xFF) не трогаем — иначе сломаем её.
-function fixUtf8(body) {
-  const looksMojibake = (s) => {
-    let hasHigh = false;
-    for (let i = 0; i < s.length; i++) {
-      const c = s.charCodeAt(i);
-      if (c > 0xFF) return false;        // настоящая кириллица (>0xFF) — не трогаем
-      if (c >= 0x80) hasHigh = true;     // байт mis-decoded utf8
-    }
-    return hasHigh;
-  };
-  const fix = (s) => (looksMojibake(s) ? Buffer.from(s, 'latin1').toString('utf8') : s);
-  for (const k of Object.keys(body)) {
-    const v = body[k];
-    if (typeof v === 'string') body[k] = fix(v);
-    else if (Array.isArray(v)) body[k] = v.map((x) => (typeof x === 'string' ? fix(x) : x));
-  }
-}
 
 // Вложения: читаем файлы в буферы, не превышая суммарный лимит письма.
 function buildAttachments(files) {
@@ -92,7 +72,6 @@ app.post('/api/careers/analyst/submit', limiter, (req, res) => {
         cleanup();
         return res.status(400).json({ error: 'upload_failed' });
       }
-      fixUtf8(req.body);
       // Honeypot: непустое поле website = бот. Тихо отдаём 200, ничего не делаем (по ТЗ).
       if (req.body.website && String(req.body.website).trim()) {
         cleanup();
