@@ -18,12 +18,19 @@ export async function sendNotification({ subject, html, attachments }) {
   if (!to.length) throw new Error('NOTIFY_EMAIL_1/2 not configured');
   if (!process.env.ZOHO_USER || !process.env.ZOHO_APP_PASSWORD) throw new Error('Zoho SMTP credentials not configured');
 
+  const host = process.env.SMTP_HOST || 'smtppro.zoho.com';
+  const port = Number(process.env.SMTP_PORT || 465);
   const transport = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtppro.zoho.com',
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: Number(process.env.SMTP_PORT || 465) === 465,
+    host,
+    port,
+    secure: port === 465,
     auth: { user: process.env.ZOHO_USER, pass: process.env.ZOHO_APP_PASSWORD },
+    // Быстрый отказ вместо зависания на ~2 мин при недоступном SMTP.
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
   });
+  console.log(`[mailer] sending via ${host}:${port} as ${process.env.ZOHO_USER}`);
 
   await transport.sendMail({
     from,
