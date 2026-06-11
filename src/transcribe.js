@@ -30,11 +30,14 @@ export async function transcribeAll(files) {
     return result;
   }
 
-  const openai = new OpenAI({ apiKey: key });
+  // timeout + без ретраев: при зависании/сбое — fallback, отправку не блокируем (по ТЗ §3).
+  const openai = new OpenAI({ apiKey: key, timeout: 45000, maxRetries: 0 });
   for (const name of VOICE_FIELDS) {
     const file = files[`voice_${name}`]?.[0];
     if (!file) continue;
+    const t0 = Date.now();
     try {
+      console.log(`[whisper] ${name}: start (${file.size}B)`);
       const upload = await toFile(fs.createReadStream(file.path), `voice_${name}.${fileExt(file)}`);
       const transcription = await openai.audio.transcriptions.create({
         file: upload,
@@ -44,8 +47,9 @@ export async function transcribeAll(files) {
       });
       const text = (typeof transcription === 'string' ? transcription : transcription?.text || '').trim();
       result[name] = text || FALLBACK;
+      console.log(`[whisper] ${name}: ok in ${Date.now() - t0}ms (${result[name].length} chars)`);
     } catch (e) {
-      console.error(`[whisper] ${name}: ${e.message}`);
+      console.error(`[whisper] ${name}: FAIL in ${Date.now() - t0}ms — ${e.status || ''} ${e.message}`);
       result[name] = FALLBACK;
     }
   }
