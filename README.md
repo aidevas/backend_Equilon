@@ -9,7 +9,7 @@
 - Node.js + Express
 - `multer` — приём multipart (текст + аудиофайлы)
 - OpenAI Whisper — транскрипция (ru)
-- `nodemailer` + Zoho SMTP — доставка писем
+- Zoho Mail API (HTTP) — доставка писем (SMTP не используется: Railway блокирует SMTP-порты)
 - Хранение аудио: вложением в письмо (старт) → Cloudflare R2 (продакшен, Блок 2)
 
 ## Эндпоинт
