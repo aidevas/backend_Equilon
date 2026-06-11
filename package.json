@@ -1,0 +1,18 @@
+{
+  "name": "backend-equilon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Equilon FX careers analyst form — submission backend",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.16",
+    "openai": "^4.77.0"
+  }
+}

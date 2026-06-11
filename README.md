@@ -1,36 +1,36 @@
 # backend_Equilon
 
-Бэкенд приёма анкеты Equilon FX (careers/analyst): приём `multipart/form-data`,
-транскрипция голосовых ответов (OpenAI Whisper), письмо с содержанием анкеты на
-два адреса, хранение/прикрепление аудио.
+Бэкенд приёма анкеты Equilon FX (`careers/analyst`): принимает `multipart/form-data`,
+транскрибирует голосовые ответы (OpenAI Whisper), собирает письмо с содержанием
+анкеты и шлёт его на два адреса, прикрепляет оригиналы аудио.
 
 ## Стек
 
 - Node.js + Express
 - `multer` — приём multipart (текст + аудиофайлы)
 - OpenAI Whisper — транскрипция (ru)
-- `nodemailer` + Zoho SMTP (`hello@equilonfx.com`) — доставка писем
-- Хранение аудио: вложением в письмо (старт) → Cloudflare R2 (продакшен)
+- `nodemailer` + Zoho SMTP — доставка писем
+- Хранение аудио: вложением в письмо (старт) → Cloudflare R2 (продакшен, Блок 2)
 
 ## Эндпоинт
 
 `POST /api/careers/analyst/submit` — принимает анкету, возвращает `200 {ok:true}`.
+`GET /health` — проверка живости.
 
 ## Ветки и деплой
 
 - `dev` — разработка
-- `stag` — staging, автодеплой из stag (Railway, проект stag)
-- `prod` — продакшен, ручной деплой из prod (Railway, проект prod)
+- `stag` — staging, автодеплой из ветки `stag` (Railway, проект stag)
+- `prod` — продакшен, ручной деплой из ветки `prod` (Railway, проект prod)
 
 ## Переменные окружения
 
-Настраиваются в Railway (в репозиторий не коммитятся). См. `.env.example`.
+Задаются **только в Railway** (в репозиторий не коммитятся). Перечень — в `.env.example`.
+Секреты (`OPENAI_API_KEY`, `ZOHO_APP_PASSWORD`) и адреса получателей в код не хардкодятся.
 
-```
-OPENAI_API_KEY=
-ZOHO_USER=hello@equilonfx.com
-ZOHO_APP_PASSWORD=
-NOTIFY_EMAIL_1=hello@equilonfx.com
-NOTIFY_EMAIL_2=shadovz.bn@gmail.com
-PORT=3000
+## Локальный запуск
+
+```bash
+npm install
+node --env-file=.env src/server.js     # с DRY_RUN=1 письмо не отправляется, только логируется
 ```
