@@ -2,7 +2,7 @@
 // DRY_RUN=1 — реальная отправка не выполняется, только лог (локальные тесты).
 
 export async function sendNotification({ subject, html, attachments = [] }) {
-  const to = [process.env.NOTIFY_EMAIL_1, process.env.NOTIFY_EMAIL_2].filter(Boolean);
+  const to = [...new Set([process.env.NOTIFY_EMAIL_1, process.env.NOTIFY_EMAIL_2].filter(Boolean))];
   const from = process.env.EMAIL_FROM;
   const replyTo = process.env.REPLY_TO || process.env.NOTIFY_EMAIL_1 || from;
 
