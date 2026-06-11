@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# secrets / env — НИКОГДА не коммитим
+.env
+.env.*
+!.env.example
+
+# runtime / temp
+/uploads/
+/tmp/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
