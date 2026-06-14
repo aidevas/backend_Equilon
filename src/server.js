@@ -14,6 +14,18 @@ import { sendNotification } from './mailer.js';
 const app = express();
 app.set('trust proxy', 1); // за прокси Railway — чтобы rate-limit видел реальный IP
 
+// CORS: форма размещена на equilonfx.com, бэкенд — на Railway (другой origin).
+// Публичный submit-эндпоинт без кук/авторизации → разрешаем (по умолчанию любой origin).
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 const MAX_FILE_MB = Number(process.env.MAX_FILE_MB || 15);
 const MAX_ATTACH_TOTAL = Number(process.env.MAX_ATTACH_TOTAL_MB || 20) * 1024 * 1024;
 
