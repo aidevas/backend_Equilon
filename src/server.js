@@ -46,6 +46,16 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many submissions, try later' },
+  // Ключ по реальному IP клиента. За прокси Railway req.ip = меняющийся IP edge-ноды
+  // (trust proxy не даёт стабильный клиентский IP), поэтому берём IP явно:
+  // на проде за Cloudflare — CF-Connecting-IP (не подделать), иначе левый X-Forwarded-For.
+  keyGenerator: (req) => {
+    const cf = req.headers['cf-connecting-ip'];
+    if (cf) return cf;
+    const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    return xff || req.ip;
+  },
+  validate: { trustProxy: false, xForwardedForHeader: false },
 });
 
 function ext(originalname) {
